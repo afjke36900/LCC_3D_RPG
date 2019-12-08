@@ -22,6 +22,11 @@ public class NPC : MonoBehaviour
     // 實例化列舉
     public npcState _npcState;
 
+    [Header("補給包任務")]
+    public int propCurrent;
+    public int propTotal;
+    public Text textProp;
+
     /// <summary>
     /// 對話開始
     /// </summary>
@@ -34,6 +39,7 @@ public class NPC : MonoBehaviour
         {
             case npcState.start:
                 StartCoroutine(ShowDialog(dialogStart));
+                _npcState = npcState.notComplete;
                 break;
             case npcState.notComplete:
                 StartCoroutine(ShowDialog(dialogNotComplete));
@@ -83,6 +89,22 @@ public class NPC : MonoBehaviour
     private void DialogEnd()
     {
         dialog.SetActive(false);
+    }
+
+    /// <summary>
+    /// 取得道具，每次增加一個並更新介面
+    /// </summary>
+    public void GetProp()
+    {
+        propCurrent++;
+        textProp.text = "補給包 :" + propCurrent + " / " + propTotal;
+        if (propCurrent == propTotal) _npcState = npcState.complete;
+    }
+
+    private void Start()
+    {
+        propTotal=GameObject.FindGameObjectsWithTag("道具").Length;
+        textProp.text = "補給包 : 0 / " + propTotal;
     }
 
     private void OnTriggerEnter(Collider other)
