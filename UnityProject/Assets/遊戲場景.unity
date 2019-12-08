@@ -552,8 +552,10 @@ MonoBehaviour:
   attack: 20
   hp: 250
   speed: 1.5
-  distanceTrank: 25
-  distanceAttack: 5
+  distanceTrank: 7
+  distanceAttack: 3
+  cd: 3.5
+  rangeAttack: 2.5
 --- !u!54 &381743376
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -568,7 +570,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 80
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!136 &381743377
 CapsuleCollider:
