@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 using UnityEngine.AI;
+using System.Collections;
 
 public class Enemy : MonoBehaviour
 {
+    #region 欄位
     [Header("基本欄位")]
     public float attack = 20;
-    public float hp = 250;
     [Range(0f,100f)][Tooltip("移動送度")]
     public float speed = 1.5f;
     [Range(0f, 100f)][Tooltip("追蹤距離")]
@@ -18,13 +19,19 @@ public class Enemy : MonoBehaviour
     public float rangeAttack = 3f;
     [Range(0, 5)][Tooltip("攻擊延遲判定")]
     public float delayAttack = 1.2f;
-    
+
+    public float hp = 250;
+
     private float timer;
+
+    public Renderer [] smr;
 
     private Transform target;    //目標物件
     private Animator ani;        //動畫元件
     private NavMeshAgent agent;  //導覽代理器元件
+    #endregion
 
+    #region 事件
     private void Start()
     {
         ani = GetComponent<Animator>();
@@ -35,6 +42,7 @@ public class Enemy : MonoBehaviour
 
     private void Update()
     {
+        if (ani.GetBool("死亡開關")) return;
         Tack();
     }
     private void OnDrawGizmos()
@@ -58,7 +66,7 @@ public class Enemy : MonoBehaviour
             Attack();
         }
 
-        if (dis <= distanceTrank)
+        else if (dis <= distanceTrank)
         {
             agent.isStopped = false;
             ani.SetBool("走路開關", !agent.isStopped);
@@ -97,14 +105,40 @@ public class Enemy : MonoBehaviour
         if(Physics.Raycast(transform.position + Vector3.up, transform.forward,out hit, rangeAttack))
         {
             print(hit.collider.gameObject);
+            if (hit.collider.gameObject.name == "守衛")
+            {
+                hit.collider.GetComponent<PlayerController>().Hit(attack);
+            }
         }
     }
-    private void Hit()
+    public void Hit(float damage)
     {
-
+        ani.SetTrigger("受傷觸發");
+        print("受傷");
+        hp -= damage;
+        if (hp <= 0) Dead();
     }
     private void Dead()
     {
-
+        ani.SetBool("死亡開關", true);
+        StartCoroutine(DeadEffect());
+        CancelInvoke("DelayAttack");
     }
+
+    private IEnumerator DeadEffect()
+    {
+        float da = smr[0].material.GetFloat("_DissolveAmount");
+
+        while (da < 1)
+        {
+            da += 0.05f;
+            smr[0].material.SetFloat("_DissolveAmount", da);
+            smr[1].material.SetFloat("_DissolveAmount", da);
+            smr[2].material.SetFloat("_DissolveAmount", da);
+            yield return new WaitForSeconds(0.005f);
+        }
+
+        Destroy(gameObject);
+    }
+    #endregion
 }
